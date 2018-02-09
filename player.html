@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <div id="player"></div>
+
+    <script>
+    var tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+
+	var firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+    var player, args, skipPoints, skipTimes, skipCount;
+    function onYouTubeIframeAPIReady() {
+		if (!args) {
+			args = getArgs();
+			skipPoints = args.points.split(',');
+			skipTimes = args.times.split(',');
+			skipCount = 0;
+
+			if (!args.id) {
+				return;
+			}
+
+			player = new YT.Player('player', {
+			  height: '360',
+			  width: '640',
+			  videoId: args.id,
+			  events: {
+				'onReady': onPlayerReady
+			  }
+			});
+		}
+    }
+
+    function onPlayerReady(event) {
+        event.target.playVideo();
+        setTimeout(skipVideo, 1000);
+    }
+
+	function skipVideo() {
+
+		if (skipPoints.length != skipTimes.length) {
+        	return;
+		}
+
+		if (skipPoints.length <= skipCount) {
+        	player.stopVideo();
+        	return;
+		}
+
+		player.seekTo(skipPoints[skipCount], true);
+        setTimeout(skipVideo, skipTimes[skipCount] * 1000);
+		skipCount++;
+    }
+ 
+	function getArgs() {
+	  var args = {}, params;
+	  var temp = window.location.search.substring(1).split('&');
+	  for(var i = 0; i < temp.length; i++) {
+		params = temp[i].split('=');
+		args[params[0]] = params[1];
+	  }
+	  return args;
+	}
+
+	</script>
+  </body>
+</html>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <div id="player"></div>
+
+    <script>
+    var tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+
+	var btn = document.createElement('button');
+	btn.type = 'button';
+	btn.textContent = 'add'
+
+	var anchor = document.createElement('a');
+
+	var firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+    firstScriptTag.parentNode.insertBefore(btn, firstScriptTag);
+    firstScriptTag.parentNode.insertBefore(anchor, firstScriptTag);
+
+    var player, args, skipPoints, skipTimes;
+    function onYouTubeIframeAPIReady() {
+		if (!args) {
+			args = getArgs();
+			skipPoints = [];
+			skipTimes = [];
+
+			if (!args.id) {
+				return;
+			}
+
+			player = new YT.Player('player', {
+			  height: '360',
+			  width: '640',
+			  videoId: args.id,
+			  events: {
+				'onReady': onPlayerReady
+			  }
+			});
+		}
+    }
+
+    function onPlayerReady(event) {
+		btn.onclick = addPoint;
+    }
+
+	function addPoint() {
+		if (skipPoints.length == 0) {
+       		skipPoints[skipPoints.length] = Math.floor(player.getCurrentTime());
+			return;
+		}
+
+		if (skipPoints.length == skipTimes.length) {
+       		skipPoints[skipPoints.length] = Math.floor(player.getCurrentTime());
+		} else {
+			var time = Math.floor(player.getCurrentTime() - skipPoints[skipPoints.length - 1]);
+
+			if (time > 0) {
+       			skipTimes[skipTimes.length] = time;
+				if (anchor.href.length == 0) {
+					anchor.appendChild(document.createTextNode("play"));
+				}
+				anchor.href = './player.html?id=' + args.id
+					+ '&points=' + skipPoints.toString()
+					+ '&times=' + skipTimes.toString();
+			}
+		}
+    }
+ 
+	function getArgs() {
+	  var args = {}, params;
+	  var temp = window.location.search.substring(1).split('&');
+	  for(var i = 0; i < temp.length; i++) {
+		params = temp[i].split('=');
+		args[params[0]] = params[1];
+	  }
+	  return args;
+	}
+
+	</script>
+  </body>
+</html>
+
